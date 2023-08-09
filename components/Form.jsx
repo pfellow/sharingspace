@@ -41,7 +41,7 @@ const Form = ({ type, post, setPost, submitting, onSubmit }) => {
           <input
             value={post.tag}
             onChange={(event) => setPost({ ...post, tag: event.target.value })}
-            placeholder='#tag'
+            placeholder='tag (without #)'
             required
             className='form_input'
           />

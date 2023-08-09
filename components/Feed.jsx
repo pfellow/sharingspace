@@ -9,7 +9,7 @@ const PromptCardList = ({ data, tagClickHandler }) => {
     <div className='mt-16 prompt_layout'>
       {data.map((post) => (
         <PromptCard
-          key={post.id}
+          key={post._id}
           post={post}
           tagClickHandler={tagClickHandler}
         />
@@ -23,6 +23,8 @@ const Feed = () => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
+    if (searchText.length !== 0) return;
+
     const fetchPosts = async () => {
       const response = await fetch('/api/prompt');
       const data = await response.json();
@@ -30,14 +32,36 @@ const Feed = () => {
       setPosts(data);
     };
     fetchPosts();
-  }, []);
+  }, [searchText]);
+
+  useEffect(() => {
+    if (searchText.length === 0) return;
+
+    const fetchPosts = async () => {
+      const response = await fetch(`/api/prompt/search/${searchText}`);
+      const data = await response.json();
+
+      setPosts(data);
+    };
+
+    const timeout = setTimeout(fetchPosts, 500);
+    return () => clearTimeout(timeout);
+  }, [searchText]);
+
   const searchChangeHandler = (event) => {
     setSearchText(event.target.value);
   };
 
+  const tagClickHandler = (tag) => {
+    setSearchText(tag)
+  }
+
   return (
     <section className='feed'>
-      <form className='relative w-full flex-center'>
+      <form
+        className='relative w-full flex-center'
+        onSubmit={(event) => event.preventDefault()}
+      >
         <input
           type='text'
           placeholder='Search for a tag or a username'
@@ -47,7 +71,7 @@ const Feed = () => {
           className='search_input peer'
         />
       </form>
-      <PromptCardList data={posts} tagClickHandler={() => {}} />
+      <PromptCardList data={posts} tagClickHandler={tagClickHandler} />
     </section>
   );
 };
